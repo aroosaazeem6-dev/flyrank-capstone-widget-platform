@@ -586,7 +586,725 @@ After deletion, requesting the same widget returns:
 
 
 ---
+# Stage 2 — Hardened Submission Path
 
+## 2.1 Overview
+
+Stage 2 implements the hardened public submission path for the FlyRank Embeddable Widget & Lead-Capture Platform.
+
+The goal of this stage is to make the public submission API safe for requests coming from the internet and from customer websites hosted on different origins.
+
+The implemented submission flow includes:
+
+- Public lead submission
+- Payload validation
+- Payload-size protection
+- CORS support
+- Honest HTTP status codes
+- Rate limiting
+- Honeypot spam protection
+- IP-based geo-enrichment
+- Geo Provider A
+- Geo Provider B fallback
+- Graceful geo-enrichment failure
+- Database persistence
+- Safe non-critical side effects
+- Failure handling and testing
+
+The final hardened flow is:
+
+Customer Website
+        |
+        v
+POST /api/submissions
+        |
+        v
+CORS
+        |
+        v
+Payload Size Check
+        |
+        v
+Payload Validation
+        |
+        v
+Rate Limiting
+        |
+        v
+Honeypot Spam Protection
+        |
+        v
+Widget Validation
+        |
+        v
+Geo Provider A
+        |
+        | Failure
+        v
+Geo Provider B
+        |
+        | Both Fail
+        v
+Continue Without Geo
+        |
+        v
+Store Submission
+        |
+        v
+Non-Critical Side Effect
+        |
+        v
+Return 201 Created
+
+---
+
+## 2.2 Public Submission Endpoint
+
+The public submission endpoint was implemented as:
+
+POST /api/submissions
+
+The endpoint accepts lead information from a public/customer-facing widget.
+
+The basic submission fields are:
+
+- widget_id
+- name
+- email
+- message
+- website
+
+The `website` field is used as the honeypot spam-protection field.
+
+A successful submission is stored in the database and returns HTTP 201.
+
+Example successful response:
+
+{
+  "message": "Submission received successfully",
+  "submission": {
+    "id": 1,
+    "tenant_id": 1,
+    "widget_id": 1,
+    "name": "Test User",
+    "email": "test@example.com",
+    "message": "Stage 2 test submission"
+  }
+}
+
+---
+
+## 2.3 Payload Validation
+
+The public endpoint validates incoming request data before storing a submission.
+
+### widget_id validation
+
+`widget_id` must:
+
+- Exist in the request
+- Be numeric
+- Be a positive integer
+
+Invalid widget IDs return:
+
+HTTP 400 Bad Request
+
+Example:
+
+{
+  "error": "widget_id must be a positive integer"
+}
+
+### name validation
+
+`name` must:
+
+- Be provided
+- Be a string
+- Not be empty
+
+Invalid names return HTTP 400.
+
+### email validation
+
+`email` must:
+
+- Be provided
+- Be a string
+- Not be empty
+- Match the expected email format
+
+Invalid email example:
+
+{
+  "error": "email must be valid"
+}
+
+### message validation
+
+`message` is optional.
+
+If provided, it must be a string.
+
+Invalid message types return HTTP 400.
+
+### Input cleaning
+
+The implementation trims:
+
+- Name
+- Email
+- Message
+
+before storing the values.
+
+---
+
+<img width="563" height="168" alt="CAP2 invalid email test" src="https://github.com/user-attachments/assets/8e6116b1-dfe8-4fd6-a68f-034ae314121b" />
+
+<img width="568" height="166" alt="CAP2 missing field test" src="https://github.com/user-attachments/assets/be5333cf-46bd-4df3-ab47-d817567edd96" />
+
+---
+
+## 2.4 Widget Validation
+
+Before storing a submission, the API checks that the referenced widget exists.
+
+The widget is retrieved using its ID.
+
+If the widget does not exist, the API returns:
+
+HTTP 404 Not Found
+
+Example:
+
+{
+  "error": "Widget not found"
+}
+
+The API also checks the widget status.
+
+Only active widgets can receive submissions.
+
+If a widget is not active, the API returns:
+
+HTTP 400 Bad Request
+
+Example:
+
+{
+  "error": "Widget is not active"
+}
+
+---
+<img width="563" height="168" alt="CAP Tenant A tries to access b" src="https://github.com/user-attachments/assets/cdf30ccb-7a9c-4666-abdd-146e0ce087fd" />
+
+
+
+---
+
+## 2.5 Payload Size Protection
+
+The Express JSON parser was configured with a maximum request-body size of:
+
+10 KB
+
+Configuration:
+
+app.use(express.json({ limit: "10kb" }));
+
+This protects the public API against excessively large JSON payloads.
+
+When a request exceeds the configured limit, the API returns:
+
+HTTP 413 Payload Too Large
+
+Example:
+
+{
+  "error": "Payload too large"
+}
+
+This prevents unnecessarily large request bodies from reaching the submission processing logic.
+
+---
+
+<img width="613" height="341" alt="CAP2 PAYLOAD TOO LARGE" src="https://github.com/user-attachments/assets/660222e1-e8dd-4bb3-9e1c-f782d557953c" />
+
+---
+
+## 2.6 CORS
+
+Cross-Origin Resource Sharing (CORS) was configured because the embeddable widget will eventually run on customer websites that are different origins from the backend API.
+
+The API supports:
+
+- GET
+- POST
+- PUT
+- DELETE
+- OPTIONS
+
+Allowed request headers include:
+
+- Content-Type
+- Authorization
+
+The implementation also handles browser preflight requests.
+
+Example test origin:
+
+http://localhost:5500
+
+A successful preflight request returned:
+
+HTTP 204 No Content
+
+with:
+
+Access-Control-Allow-Origin: http://localhost:5500
+
+---
+
+<img width="633" height="290" alt="cap2 cors preflight" src="https://github.com/user-attachments/assets/584be876-0dca-4750-a576-b04576509671" />
+
+
+---
+
+## 2.7 Cross-Origin Submission
+
+After configuring CORS, an actual POST request was tested with a different origin.
+
+The test used:
+
+Origin: http://localhost:5500
+
+The API successfully accepted the cross-origin submission and returned:
+
+HTTP 201 Created
+
+This confirms that the public submission endpoint can receive requests originating from another website.
+
+---
+
+<img width="635" height="362" alt="CAP 2 CROSS ORIGIN SUBMISSION" src="https://github.com/user-attachments/assets/a7bd6ef1-fce9-4867-a351-d12c8450b9e2" />
+
+
+## 2.8 Honest HTTP Status Codes
+
+The public submission API uses status codes according to the outcome of the request.
+
+| Status | Meaning |
+|---|---|
+| 201 | Submission successfully stored |
+| 400 | Invalid request or validation failure |
+| 404 | Widget not found |
+| 413 | Request payload too large |
+| 429 | Too many requests |
+| 500 | Unexpected server error |
+
+This makes the API behavior predictable for clients and the embeddable widget.
+
+---
+
+## 2.9 JSON Error Handling
+
+A global Express error handler was added so that important API errors return JSON instead of Express's default HTML error pages.
+
+### Payload too large
+
+HTTP 413:
+
+{
+  "error": "Payload too large"
+}
+
+### Invalid JSON
+
+HTTP 400:
+
+{
+  "error": "Invalid JSON payload"
+}
+
+### Unexpected server error
+
+HTTP 500:
+
+{
+  "error": "Internal server error"
+}
+
+This keeps API responses consistent.
+
+---
+
+## 2.10 Rate Limiting
+
+Rate limiting was implemented using:
+
+express-rate-limit
+
+The submission endpoint uses:
+
+- Window: 60 seconds
+- Maximum: 10 requests
+- Key: client IP
+
+Configuration:
+
+windowMs: 60 * 1000
+max: 10
+
+Normal requests are accepted.
+
+Once the limit is exceeded, the API returns:
+
+HTTP 429 Too Many Requests
+
+Example:
+
+{
+  "error": "Too many submission attempts. Please try again later."
+}
+
+This prevents a single client from sending an unlimited number of submissions.
+
+---
+
+<img width="618" height="318" alt="CAP 2 rate limit" src="https://github.com/user-attachments/assets/897e8f47-e32f-4048-af1f-a04442c0dd32" />
+
+---
+
+## 2.11 Honeypot Spam Protection
+
+A honeypot field was added to the public submission payload:
+
+website
+
+The field is intended to remain empty for legitimate users.
+
+If the field contains a value, the submission is treated as spam.
+
+Example:
+
+{
+  "website": "https://spam.example.com"
+}
+
+The API responds with:
+
+HTTP 400 Bad Request
+
+{
+  "error": "Spam submission detected"
+}
+
+The spam submission is not stored as a legitimate lead.
+
+---
+
+<img width="628" height="158" alt="CAP2 honeypot spam" src="https://github.com/user-attachments/assets/fd27300f-17e3-4193-b96b-52718c349f8a" />
+
+
+## 2.12 Geo-Enrichment
+
+The submission API performs IP-based geo-enrichment.
+
+The purpose is to attach approximate geographic information to a submission.
+
+The stored geo fields are:
+
+- country
+- city
+
+The visitor IP address is also stored.
+
+The system was designed so that geo-enrichment is not allowed to prevent a valid lead from being stored.
+
+---
+
+## 2.13 Geo Provider A
+
+The primary geo-enrichment provider is:
+
+IPWHOIS
+
+The endpoint was tested using a public IP address.
+
+Example test IP:
+
+8.8.8.8
+
+The provider successfully returned geographic information including country and city.
+
+The application extracts:
+
+- country
+- city
+
+and stores these values with the submission when available.
+---
+<img width="623" height="371" alt="CAP 2 geo provideor" src="https://github.com/user-attachments/assets/0a6f9ac2-d4ba-4e0f-b1a1-e4bea732395a" />
+
+---
+
+
+
+## 2.14 Geo Provider B
+
+A second geo provider was implemented as a fallback.
+
+Provider B is used only when Provider A fails.
+
+The purpose of this design is to avoid depending on a single external geo-enrichment service.
+
+The fallback flow is:
+
+Provider A
+    |
+    | Success
+    v
+Return geo data
+
+Provider A
+    |
+    | Failure
+    v
+Provider B
+    |
+    | Success
+    v
+Return geo data
+
+Provider A
+    |
+    | Failure
+    v
+Provider B
+    |
+    | Failure
+    v
+Continue without geo data
+
+---
+
+<img width="618" height="227" alt="CAP2 geo providor" src="https://github.com/user-attachments/assets/31856d2b-1139-46e0-a51c-c8088a4440da" />
+
+
+---
+
+## 2.15 Provider A → Provider B Fallback
+
+The fallback mechanism was explicitly tested by temporarily causing Provider A to fail.
+
+The application then attempted Provider B.
+
+The test demonstrated:
+
+Provider A failed
+        ↓
+Provider B executed
+        ↓
+Geo data returned
+
+This confirms that Provider B is a real fallback rather than simply another unused integration.
+
+After testing, Provider A was restored to its correct production endpoint.
+
+---
+<img width="579" height="100" alt="CAP 2 Provider fallback" src="https://github.com/user-attachments/assets/5f547f91-0dff-48ed-8851-2f6edd0948ef" />
+
+
+---
+
+## 2.16 Graceful Geo Failure
+
+If both geo providers fail, the submission must not fail.
+
+Instead:
+
+country = null
+city = null
+
+The lead is still stored in the database.
+
+The expected behavior is:
+
+Geo Provider A fails
+        ↓
+Geo Provider B fails
+        ↓
+Geo data unavailable
+        ↓
+Submission continues
+        ↓
+Lead stored successfully
+
+This prevents an external geo service outage from causing lead loss.
+
+---
+
+## 2.17 Database Persistence
+
+After validation and geo-enrichment, the submission is stored in the `submissions` table.
+
+The stored information includes:
+
+- tenant_id
+- widget_id
+- name
+- email
+- message
+- ip_address
+- country
+- city
+- created_at
+
+The tenant ID is taken from the widget ownership information rather than trusted directly from the public request.
+
+This ensures the submission remains associated with the correct tenant.
+
+---
+
+## 2.18 Safe Non-Critical Side Effect
+
+A non-critical notification side effect was implemented.
+
+For this capstone implementation, the side effect is represented by console logging rather than requiring an external email service.
+
+After a successful database insertion, the system attempts to execute the notification.
+
+Example:
+
+New lead notification:
+{
+  submissionId: ...,
+  widgetId: ...,
+  name: "...",
+  email: "..."
+}
+
+The side effect is intentionally non-critical.
+
+---
+<img width="517" height="103" alt="CAP 2 safe side effect failure2" src="https://github.com/user-attachments/assets/25383397-4bdc-40b6-9524-bf586071200c" />
+
+
+
+---
+
+## 2.19 Side-Effect Failure Handling
+
+The side effect was deliberately forced to fail during testing.
+
+The application produced an error similar to:
+
+Non-critical notification failed:
+Simulated notification service failure
+
+However, the lead submission still returned:
+
+HTTP 201 Created
+
+The lead remained stored in the database.
+
+Therefore:
+
+Side effect failure
+        ↓
+Does NOT cancel submission
+        ↓
+Lead remains stored
+        ↓
+API returns 201
+
+This demonstrates that a non-critical external operation cannot cause successful lead capture to fail.
+
+---
+<img width="608" height="235" alt="CAP2 safe side effect failure1" src="https://github.com/user-attachments/assets/6953dcfb-b909-4509-a9a1-b42ab1a74b94" />
+
+
+
+---
+
+## 2.20 Complete End-to-End Submission Flow
+
+The complete hardened submission flow is now:
+
+1. Customer website sends a submission.
+2. CORS permits the cross-origin request.
+3. Express checks the request-body size.
+4. Rate limiting checks the client IP.
+5. Honeypot protection checks for spam.
+6. Payload validation verifies the request.
+7. Widget existence and status are verified.
+8. Visitor IP is obtained.
+9. Geo Provider A is attempted.
+10. Provider B is used if Provider A fails.
+11. Geo failure does not prevent lead storage.
+12. Submission is stored in SQLite.
+13. Non-critical notification is attempted.
+14. Notification failure does not invalidate the submission.
+15. API returns the appropriate HTTP response.
+
+---
+
+## 2.21 Stage 2 Testing Summary
+
+The following scenarios were tested during Stage 2:
+
+| Test | Expected Result | Status |
+|---|---|---|
+| Valid submission | 201 Created | ✅ Passed |
+| Invalid email | 400 Bad Request | ✅ Passed |
+| Missing required field | 400 Bad Request | ✅ Passed |
+| Unknown widget | 404 Not Found | ✅ Passed |
+| Oversized payload | 413 Payload Too Large | ✅ Passed |
+| CORS preflight | 204 No Content | ✅ Passed |
+| Cross-origin submission | 201 Created | ✅ Passed |
+| Rate limit exceeded | 429 Too Many Requests | ✅ Passed |
+| Honeypot populated | 400 Spam response | ✅ Passed |
+| Geo Provider A | Country/city returned | ✅ Passed |
+| Geo Provider B | Country/city returned | ✅ Passed |
+| Provider A failure → Provider B | Fallback successful | ✅ Passed |
+| Geo providers unavailable | Submission continues | ✅ Implemented |
+| Side effect success | Notification executed | ✅ Passed |
+| Side effect failure | Submission still succeeds | ✅ Passed |
+
+---
+
+## 2.22 Stage 2 Completion
+
+Stage 2 — Hardened Submission Path is complete.
+
+Completed functionality:
+
+- Public submission endpoint
+- Payload validation
+- Payload-size protection
+- CORS
+- Honest HTTP status codes
+- JSON error handling
+- Rate limiting
+- Honeypot spam protection
+- Geo Provider A
+- Geo Provider B fallback
+- Graceful geo failure
+- Database persistence
+- Safe non-critical side effect
+- Side-effect failure handling
+- End-to-end testing
+
+The public submission path is now hardened against common malformed-request, abuse, cross-origin, spam, external-service, and non-critical side-effect failure scenarios.
+
+---
+
+
+# Stage 2 Result
+
+Stage 2 establishes a hardened public lead-capture API that can safely accept submissions from external customer websites while applying validation, abuse protection, cross-origin support, geographic enrichment, graceful external-service failure handling, persistent storage, and safe non-critical side effects.
 
 # License
 
