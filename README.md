@@ -1,37 +1,410 @@
-# Embeddable Widget & Lead-Capture Platform
+<div align="center">
+# 🚀 Embeddable Widget & Lead-Capture Platform (CAPSTONE)
 
-A backend-focused embeddable widget and lead-capture platform built as part of the FlyRank Backend Internship Capstone.
+<p>
+  <strong>A secure, multi-tenant platform for creating, delivering, and managing embeddable lead-capture widgets across customer websites.</strong>
+</p>
 
-The platform allows a customer to create a widget, generate an embeddable script, place it on a website from a different origin, and safely receive lead submissions through a hardened public API.
+<br>
 
-The system is designed around public-internet backend concerns including authentication, tenant isolation, CORS, validation, rate limiting, spam protection, caching, geo-enrichment, fallback handling, and safe side effects.
+[![Node.js](https://img.shields.io/badge/Node.js-24.x-339933?style=for-the-badge&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express.js-5.x-000000?style=for-the-badge&logo=express&logoColor=white)](https://expressjs.com/)
+[![SQLite](https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white)](https://www.sqlite.org/)
+[![Jest](https://img.shields.io/badge/Jest-Testing-C21325?style=for-the-badge&logo=jest&logoColor=white)](https://jestjs.io/)
+[![Supertest](https://img.shields.io/badge/Supertest-API_Testing-6DB33F?style=for-the-badge)](https://github.com/ladjs/supertest)
+[![JavaScript](https://img.shields.io/badge/JavaScript-Widget-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)](https://developer.mozilla.org/en-US/docs/Web/JavaScript)
+
+<br>
+
+**Multi-Tenant • Secure • Embeddable • Versioned • Cross-Origin • Testable**
+
+</div>
 
 ---
 
-# Project Status
+---
 
-| Stage |
-|---|---|
-| Stage 0 — Design 
-| Stage 1 — Project Foundation & Widget Management 
-| Stage 2 — Hardened Submission Path 
-| Stage 3 — Delivery, Dashboard & Testing 
-| Stage 4 — Demo Preparation 
+## 🎯 Core Capabilities
+
+<table>
+<tr>
+<td width="50%">
+
+### 🧩 Widget Management
+- Create widgets
+- List widgets
+- Retrieve individual widgets
+- Update widgets
+- Delete widgets
+- Per-widget embed snippets
+- Versioned widget delivery
+
+</td>
+<td width="50%">
+
+### 🌐 Embeddable Delivery
+- Public widget configuration
+- Cross-origin support
+- Customer-site integration
+- Versioned JavaScript
+- HTTP caching
+- Independent customer origins
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### 🛡️ Security & Protection
+- API-key authentication
+- Tenant isolation
+- Input validation
+- CORS protection
+- Rate limiting
+- Payload-size protection
+- Honeypot spam protection
+
+</td>
+<td width="50%">
+
+### 📊 Lead Capture & Analytics
+- Public lead submission
+- IP-based geolocation
+- Provider fallback
+- Safe notification handling
+- Tenant-scoped submissions
+- Dashboard statistics
+- Submission analytics
+
+</td>
+</tr>
+
+<tr>
+<td width="50%">
+
+### 🧪 Reliability & Testing
+- Automated API tests
+- CORS testing
+- Payload validation tests
+- Rate-limit testing
+- Spam-protection testing
+- Geo-fallback testing
+- Widget-rendering tests
+
+</td>
+<td width="50%">
+
+### 🏗️ Architecture
+- Multi-tenant backend
+- RESTful API
+- SQLite persistence
+- Modular Express routes
+- Middleware-based protection
+- Service-based enrichment
+- Version-aware widget delivery
+
+</td>
+</tr>
+</table>
 
 ---
 
-# Technology Stack
+# 🏛️ Architecture Overview
 
-- Node.js
-- Express.js
-- SQLite
-- better-sqlite3
-- JavaScript
-- Git
-- GitHub
-- CORS
-- dotenv
+FlyRank separates the platform into three major request paths:
 
+### 👤 Widget Owner
+
+    Widget Owner
+         |
+         | Authenticated API
+         v
+    Widget Management API
+         |
+         v
+    Tenant-Isolated Database
+         |
+         v
+    Embed Snippet
+
+### 🌍 Customer Website
+
+    Customer Website
+         |
+         | <script src=".../widget.js?id=1&v=1">
+         v
+    Versioned Widget JavaScript
+         |
+         v
+    Public Widget Configuration
+         |
+         v
+    Rendered Widget
+
+### 📝 Website Visitor
+
+    Website Visitor
+         |
+         | Form submission
+         v
+    Public Submission API
+         |
+         +----> Validation
+         |
+         +----> Rate Limiting
+         |
+         +----> Spam Protection
+         |
+         +----> Geo Enrichment
+         |
+         +----> Store Submission
+         |
+         +----> Non-Critical Notification
+
+---
+
+# 🔄 Platform Flow
+
+    ┌───────────────────────┐
+    │    Widget Owner       │
+    │                       │
+    │ Create / Manage       │
+    │ Widgets               │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │   Widget Management   │
+    │         API           │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │  Tenant-Isolated      │
+    │      Database         │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │    Embed Snippet      │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │  Customer Website     │
+    │                       │
+    │   localhost:5500      │
+    └──────────┬────────────┘
+               │
+               │ Loads widget.js
+               ▼
+    ┌───────────────────────┐
+    │ Versioned Widget      │
+    │ JavaScript            │
+    │                       │
+    │ localhost:3000        │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │    Render Widget      │
+    └──────────┬────────────┘
+               │
+               │ Lead submission
+               ▼
+    ┌───────────────────────┐
+    │ Public Submission API │
+    └──────────┬────────────┘
+               │
+       ┌───────┼────────┐
+       ▼       ▼        ▼
+    Validate  Protect  Enrich
+       │       │        │
+       └───────┼────────┘
+               ▼
+    ┌───────────────────────┐
+    │       Database        │
+    │      Submission       │
+    └──────────┬────────────┘
+               │
+               ▼
+    ┌───────────────────────┐
+    │ Dashboard / Analytics │
+    └───────────────────────┘
+
+---
+
+# 🛠️ Technology Stack
+
+## Backend
+
+| Technology | Purpose |
+|------------|---------|
+| 🟢 **Node.js** | JavaScript runtime |
+| ⚫ **Express.js** | REST API and HTTP server |
+| 🗄️ **SQLite** | Persistent relational database |
+| ⚡ **better-sqlite3** | SQLite database access |
+
+## Security & Middleware
+
+| Technology | Purpose |
+|------------|---------|
+| 🌐 **CORS** | Cross-origin request handling |
+| 🚦 **Express Rate Limit** | Submission rate limiting |
+| 🔐 **Authentication Middleware** | API-key authentication |
+| 📦 **Express JSON Limits** | Request payload protection |
+| 🛡️ **Input Validation** | Public submission validation |
+| 🤖 **Honeypot Protection** | Basic bot/spam detection |
+
+## Widget
+
+| Technology | Purpose |
+|------------|---------|
+| 🟨 **Vanilla JavaScript** | Embeddable widget client |
+| 🟧 **HTML** | Widget/customer-site structure |
+| 🎨 **CSS** | Widget styling |
+| 🔢 **Versioned JavaScript** | Safe widget version delivery |
+
+## Testing
+
+| Technology | Purpose |
+|------------|---------|
+| 🧪 **Jest** | Automated test runner |
+| 🔬 **Supertest** | HTTP/API endpoint testing |
+
+## Development Tools
+
+| Tool | Purpose |
+|------|---------|
+| 📦 **npm** | Dependency management |
+| 🔄 **Nodemon** | Development server reload |
+| 💻 **PowerShell** | Local development commands |
+| 📝 **VS Code** | Development environment |
+| 🐙 **Git / GitHub** | Version control and repository hosting |
+
+---
+
+# 🔐 Security at a Glance
+
+FlyRank uses multiple layers of protection:
+
+    🔑 API-Key Authentication
+            ↓
+    🏢 Tenant Isolation
+            ↓
+    ✅ Input Validation
+            ↓
+    🌐 CORS Protection
+            ↓
+    📦 Payload Size Protection
+            ↓
+    🚦 Rate Limiting
+            ↓
+    🤖 Honeypot Spam Protection
+            ↓
+    🌍 Safe Geo Enrichment
+            ↓
+    💾 Secure Submission Storage
+
+The public widget does **not** expose tenant API keys.
+
+---
+
+# 🏢 Multi-Tenant Design
+
+FlyRank is designed around tenant-scoped data access.
+
+    Tenant A
+       │
+       ├── Widget A1
+       ├── Widget A2
+       └── Submissions
+       
+    Tenant B
+       │
+       ├── Widget B1
+       ├── Widget B2
+       └── Submissions
+
+Each authenticated request resolves the tenant from the supplied API key.
+
+Database queries are scoped to that tenant.
+
+This prevents one tenant from directly accessing another tenant's:
+
+- Widgets
+- Submissions
+- Dashboard data
+- Statistics
+
+---
+
+# 🌍 Cross-Origin Widget Model
+
+The platform demonstrates a real cross-origin scenario:
+
+    API Server
+    http://localhost:3000
+
+              ↕
+          CORS / API
+              ↕
+
+    Customer Website
+    http://localhost:5500
+
+Because the ports are different, these represent different origins.
+
+The customer website loads the public widget JavaScript from the API server.
+
+---
+
+# 📦 Widget Delivery
+
+A widget can be loaded using a versioned URL such as:
+
+    http://localhost:3000/widget.js?id=1&v=1
+
+The version parameter allows the platform to serve specific widget versions.
+
+The widget JavaScript is configured with long-lived cache headers:
+
+    Cache-Control: public, max-age=31536000, immutable
+
+This allows browsers and caching layers to reuse a specific widget version.
+
+---
+
+# 📝 Lead Capture
+
+Visitors interact with the widget on the customer website.
+
+The submission is sent to:
+
+    POST /api/submissions
+
+The platform then performs:
+
+    Request
+      ↓
+    Validation
+      ↓
+    Widget Verification
+      ↓
+    Rate Limiting
+      ↓
+    Spam Protection
+      ↓
+    Geo Enrichment
+      ↓
+    Database Storage
+      ↓
+    Notification Side Effect
+
+Geo enrichment and notification are treated as non-critical side effects so that their failure does not unnecessarily prevent a valid lead from being stored.
+
+---
 
 # Stage 0 — Design
 
@@ -1306,6 +1679,928 @@ The public submission path is now hardened against common malformed-request, abu
 
 Stage 2 establishes a hardened public lead-capture API that can safely accept submissions from external customer websites while applying validation, abuse protection, cross-origin support, geographic enrichment, graceful external-service failure handling, persistent storage, and safe non-critical side effects.
 
-# License
 
-This project was created as part of the FlyRank Backend Internship Capstone.
+# Stage 3 — Embeddable Widget Platform
+
+Stage 3 connects the public submission system to an actual embeddable widget and customer website.
+
+## Stage 3 Completed Features
+
+- Public widget configuration
+- HTTP caching
+- Versioned widget JavaScript
+- Embed snippet generation
+- Second-origin customer website
+- Widget rendering
+- End-to-end widget submission
+- Dashboard submissions API
+- Dashboard statistics
+- Automated tests
+
+---
+
+# Stage 3.1 — Public Widget Configuration
+
+The widget requires public configuration information so the customer browser can render the correct widget.
+
+The configuration is associated with the widget ID.
+
+The customer browser does not receive a tenant API key.
+
+The public widget flow is:
+
+    Customer Website
+           |
+           v
+    widget.js?id=1&v=1
+           |
+           v
+    Public Widget Configuration
+           |
+           v
+    Render Widget
+
+---
+
+# Stage 3.2 — HTTP Caching
+
+Widget delivery uses caching headers.
+
+The versioned JavaScript bundle is configured for long-lived caching.
+
+Example:
+
+    Cache-Control: public, max-age=31536000, immutable
+
+The purpose is to allow browsers and CDN-like caches to reuse the widget JavaScript while changing the version URL when a new widget version is released.
+
+---
+
+# Stage 3.3 — Versioned Widget JavaScript
+
+Widget JavaScript is served through:
+
+    GET /widget.js?id=1&v=1
+
+The current widget client is located at:
+
+    widget/
+    └── widget-client.js
+
+The server exposes the versioned JavaScript through:
+
+    /widget.js
+
+Version 1 example:
+
+    <script src="http://localhost:3000/widget.js?id=1&v=1"></script>
+
+Unsupported versions are rejected.
+
+<img width="621" height="422" alt="CAP 3 versioned widget" src="https://github.com/user-attachments/assets/febd5a1f-bde4-40ab-b940-9748a488bd85" />
+
+
+# Stage 3.4 — Embed Snippet Generation
+
+Each widget generates its own embed snippet.
+
+Example:
+
+    <script src="http://localhost:3000/widget.js?id=1&v=1"></script>
+
+The generated snippet contains:
+
+- Widget ID
+- Widget version
+
+The tenant API key is never placed inside the public embed snippet.
+
+Example of what is NOT exposed:
+
+    demo-tenant-api-key-12345
+
+<img width="664" height="240" alt="CAP 3 embed snippet" src="https://github.com/user-attachments/assets/486dabf4-e395-4a75-81c8-4da9857a4523" />
+
+
+# Stage 3.5 — Second-Origin Customer Website
+
+A separate customer website was created to prove that the widget works outside the API origin.
+
+Customer website:
+
+    http://localhost:5500
+
+API:
+
+    http://localhost:3000
+
+These are different origins because they use different ports.
+
+Customer site structure:
+
+    customer-site/
+    ├── index.html
+    └── server.js
+
+The customer site is served locally using Node.js.
+
+Example command:
+
+    node customer-site/server.js
+
+Expected:
+
+    Customer site running on http://localhost:5500
+
+The API remains:
+
+    npm run dev
+
+at:
+
+    http://localhost:3000
+
+---
+
+# Stage 3.6 — Widget Rendering
+
+The customer page contains the generated widget snippet:
+
+    <script src="http://localhost:3000/widget.js?id=1&v=1"></script>
+
+The widget successfully renders on:
+
+    http://localhost:5500
+
+The rendering flow is:
+
+    localhost:5500
+          |
+          v
+    widget.js
+          |
+          v
+    localhost:3000
+          |
+          v
+    Widget configuration
+          |
+          v
+    Widget rendered
+
+<img width="949" height="475" alt="CAP3 step 3 step 5 widget origin" src="https://github.com/user-attachments/assets/4099b63c-51fe-477c-8175-b16b0e2a0bf9" />
+
+
+---
+
+# Stage 3.7 — End-to-End Widget Submission
+
+The actual widget was used to submit a lead from the second-origin customer website.
+
+Example test data:
+
+    Name:
+    Stage 3 Test User
+
+    Email:
+    stage3@example.com
+
+    Message:
+    End-to-end widget submission test
+
+The submission flow was successfully completed:
+
+    Customer Website
+    localhost:5500
+           |
+           v
+    Widget
+           |
+           v
+    POST /api/submissions
+           |
+           v
+    Validation
+           |
+           v
+    Database
+           |
+           v
+    Notification / safe side effect
+
+The widget displayed:
+
+    Submission received successfully.
+
+<img width="209" height="107" alt="CAP3 submission success2" src="https://github.com/user-attachments/assets/170e73f5-23de-41a9-889f-2bb802c8a3b1" />
+<img width="408" height="423" alt="CAP3 submission sucess1" src="https://github.com/user-attachments/assets/6ac17625-276a-4b82-939d-621d0f250c1d" />
+
+
+# Stage 3.8 — Dashboard Submissions API
+
+Authenticated dashboard submissions endpoint:
+
+    GET /api/dashboard/submissions
+
+Authentication:
+
+    Authorization: Bearer <API_KEY>
+
+The response contains tenant-scoped submissions.
+
+Example response:
+
+    {
+      "data": [
+        {
+          "id": 21,
+          "widget_id": 1,
+          "widget_name": "Demo Widget",
+          "name": "Stage 3 Test User",
+          "email": "stage3@example.com",
+          "message": "End-to-end widget submission test",
+          "ip_address": "::1",
+          "country": null,
+          "city": null,
+          "created_at": "..."
+        }
+      ],
+      "pagination": {
+        "page": 1,
+        "limit": 20,
+        "total": 1,
+        "totalPages": 1
+      }
+    }
+
+## Pagination
+
+Supported parameters:
+
+    ?page=1&limit=20
+
+The limit is bounded to prevent excessively large responses.
+
+## Tenant Isolation
+
+The endpoint determines the tenant from the authenticated API key.
+
+The client cannot choose another tenant by supplying a tenant ID.
+<img width="591" height="335" alt="CAP3 dashboard submission" src="https://github.com/user-attachments/assets/0e13b3f0-e189-4aed-9cb6-0fef3a1c7b52" />
+
+
+### Tenant Isolation Screenshot
+
+<img width="595" height="202" alt="CAP3  dashboard tenant isolatin" src="https://github.com/user-attachments/assets/337bccf5-5f20-4e6c-8f00-5f345ef7c239" />
+
+
+# Stage 3.9 — Dashboard Statistics
+
+Dashboard statistics endpoint:
+
+    GET /api/dashboard/stats
+
+Authentication:
+
+    Authorization: Bearer <API_KEY>
+
+The response provides basic analytics.
+
+## Total Submissions
+
+Example:
+
+    {
+      "totalSubmissions": 1
+    }
+
+## Per-Widget Statistics
+
+Example:
+
+    {
+      "byWidget": [
+        {
+          "widget_id": 1,
+          "widget_name": "Demo Widget",
+          "submission_count": 1
+        }
+      ]
+    }
+
+## Geo Breakdown
+
+Example:
+
+    {
+      "byCountry": [
+        {
+          "country": "Unknown",
+          "submission_count": 1
+        }
+      ]
+    }
+
+## Counts Over Time
+
+Example:
+
+    {
+      "overTime": [
+        {
+          "date": "YYYY-MM-DD",
+          "submission_count": 1
+        }
+      ]
+    }
+
+All statistics are filtered according to the authenticated tenant.
+
+<img width="576" height="382" alt="CAP3 dashboard stats" src="https://github.com/user-attachments/assets/44cc604b-f334-449a-96df-306f52061891" />
+
+
+---
+
+# Stage 3.10 — Automated Testing
+
+Automated testing was implemented using:
+
+- Jest
+- Supertest
+
+Testing dependencies were added as development dependencies.
+
+The project test command is:
+
+    npm test
+
+The Jest test runner is configured to run the test suite.
+
+---
+
+# Automated Test Coverage
+
+The automated test suite covers the required Stage 3 behavior.
+
+## CORS Preflight
+
+Test file:
+
+    tests/cors.test.js
+
+Verifies:
+
+- OPTIONS request
+- Cross-origin request
+- Allowed methods
+- Allowed headers
+- Successful preflight response
+
+Result:
+
+    PASS
+<img width="588" height="202" alt="CAP 3 cors test" src="https://github.com/user-attachments/assets/830f7c2c-fa82-484f-9b6e-fa8c9bd8e1a9" />
+
+---
+
+## Invalid Submission Payload
+
+Test file:
+
+    tests/submissions-validation.test.js
+
+Verifies rejection of invalid submission payloads, including:
+
+- Missing widget_id
+- Empty name
+- Invalid email
+- Invalid message
+
+Expected status:
+
+    400 Bad Request
+
+<img width="610" height="197" alt="CAP3 submission valid test" src="https://github.com/user-attachments/assets/220412df-fd35-4c2e-b674-d73857c5fb56" />
+
+## Oversized Payload
+
+Test file:
+
+    tests/payload-size.test.js
+
+Verifies that payloads larger than the configured request limit are rejected.
+
+Expected status:
+
+    413 Payload Too Large
+
+<img width="591" height="203" alt="CAP3 payload size test" src="https://github.com/user-attachments/assets/bd46403e-dd47-4142-90a3-d90822a08ced" />
+
+
+## Rate Limiting
+
+Test file:
+
+    tests/rate-limit.test.js
+
+Verifies that excessive submission requests are blocked.
+
+Expected behavior:
+
+    Allowed requests
+           |
+           v
+    Rate limit reached
+           |
+           v
+    429 Too Many Requests
+
+### Screenshot
+
+    [SCREENSHOT: stage-3-step-9-rate-limit-test.png]
+
+---
+
+## Honeypot / Spam Protection
+
+Test file:
+
+    tests/spam-honeypot.test.js
+
+Verifies:
+
+    Honeypot filled
+           |
+           v
+    Submission rejected
+
+and:
+
+    Honeypot empty
+           |
+           v
+    Submission allowed
+
+<img width="595" height="202" alt="CAP3  dashboard tenant isolatin" src="https://github.com/user-attachments/assets/414c6997-a11a-467e-b826-61c91c2f702d" />
+
+
+## Geo Provider Fallback
+
+Test file:
+
+    tests/geo-fallback.test.js
+
+Verifies the fallback behavior:
+
+    Provider A
+        |
+        | failure
+        v
+    Provider B
+        |
+        | failure
+        v
+    Return null
+        |
+        v
+    Submission continues without geo data
+
+The test also verifies that local/private IP addresses skip external geo lookup.
+
+The test mocks provider failures, so the automated test does not depend on live external geo services.
+
+<img width="595" height="207" alt="CAP3 geofallback test" src="https://github.com/user-attachments/assets/a85cf4f2-837e-4d5f-a154-327191dcbb80" />
+
+
+## Widget Rendering Delivery
+
+Test file:
+
+    tests/widget-rendering.test.js
+
+Verifies:
+
+- Version 1 widget JavaScript is served
+- Correct JavaScript response
+- Widget client content is present
+- Unsupported versions are rejected
+
+<img width="635" height="201" alt="CAP3 widget rendering test" src="https://github.com/user-attachments/assets/55272498-5100-4a80-b972-0621abc52a4c" />
+
+# Final Automated Test Result
+
+The complete automated test suite was executed successfully.
+
+Final result:
+
+    Test Suites: 7 passed, 7 total
+    Tests:       13 passed, 13 total
+    Snapshots:   0 total
+
+All Stage 3 automated tests passed.
+
+### Main Test Screenshot
+<img width="516" height="204" alt="ALL TEST" src="https://github.com/user-attachments/assets/1058dbc4-c4c3-4ac1-aa29-fa5a82aaf469" />
+
+
+#  Project Structure
+
+    flyrank-capstone-widget-platform/
+    │
+    ├── customer-site/
+    │   ├── index.html
+    │   └── server.js
+    │
+    ├── src/
+    │   │
+    │   ├── db/
+    │   │   ├── database.js
+    │   │   └── seed-tenants.js
+    │   │
+    │   ├── middleware/
+    │   │   └── auth.js
+    │   │
+    │   ├── routes/
+    │   │   ├── dashboard.js
+    │   │   ├── public.js
+    │   │   ├── protected.js
+    │   │   ├── submissions.js
+    │   │   └── widgets.js
+    │   │
+    │   ├── services/
+    │   │   ├── geoService.js
+    │   │   └── notificationService.js
+    │   │
+    │   └── server.js
+    │
+    ├── tests/
+    │   ├── cors.test.js
+    │   ├── geo-fallback.test.js
+    │   ├── payload-size.test.js
+    │   ├── rate-limit.test.js
+    │   ├── spam-honeypot.test.js
+    │   ├── submissions-validation.test.js
+    │   └── widget-rendering.test.js
+    │
+    ├── widget/
+    │   └── widget-client.js
+    │
+    ├── package.json
+    ├── package-lock.json
+    ├── README.md
+    └── .env
+
+Note: Do not commit .env or other secret files to GitHub.
+
+---
+
+#  API Documentation
+
+## Health
+
+    GET /
+
+Returns the API status.
+
+    GET /health
+
+Returns:
+
+    {
+      "status": "ok"
+    }
+
+---
+
+# Authentication
+
+Authenticated endpoints use:
+
+    Authorization: Bearer <API_KEY>
+
+---
+
+# Widget Management
+
+## Create Widget
+
+    POST /api/widgets
+
+Authentication required.
+
+Example:
+
+    {
+      "name": "Contact Widget",
+      "type": "contact"
+    }
+
+---
+
+## List Widgets
+
+    GET /api/widgets
+
+Authentication required.
+
+---
+
+## Get Widget
+
+    GET /api/widgets/:id
+
+Authentication required.
+
+---
+
+## Update Widget
+
+    PUT /api/widgets/:id
+
+Authentication required.
+
+---
+
+## Delete Widget
+
+    DELETE /api/widgets/:id
+
+Authentication required.
+
+---
+
+# Public Widget Delivery
+
+## Widget JavaScript
+
+    GET /widget.js?id=1&v=1
+
+Public endpoint.
+
+The JavaScript bundle is versioned so that new versions can be delivered using a new version identifier.
+
+---
+
+# Public Submissions
+
+## Create Submission
+
+    POST /api/submissions
+
+Public endpoint.
+
+Example:
+
+    {
+      "widget_id": 1,
+      "name": "Jane Doe",
+      "email": "jane@example.com",
+      "message": "I would like more information."
+    }
+
+Possible responses include:
+
+    201 Created
+    400 Bad Request
+    404 Widget Not Found
+    429 Too Many Requests
+
+---
+
+# Dashboard
+
+## List Submissions
+
+    GET /api/dashboard/submissions
+
+Authentication required.
+
+Optional pagination:
+
+    ?page=1&limit=20
+
+---
+
+## Dashboard Statistics
+
+    GET /api/dashboard/stats
+
+Authentication required.
+
+Provides:
+
+- Total submissions
+- Per-widget statistics
+- Country/geo breakdown
+- Submission counts over time
+
+---
+
+# Running the Project
+
+## Install Dependencies
+
+Clone the repository and run:
+
+    npm install
+
+---
+
+## Configure Environment
+
+Create:
+
+    .env
+
+Add the environment variables required by the application.
+
+Do not commit secrets.
+
+---
+
+## Start Development Server
+
+    npm run dev
+
+API:
+
+    http://localhost:3000
+
+---
+
+## Start Customer Website
+
+In another terminal:
+
+    node customer-site/server.js
+
+Customer website:
+
+    http://localhost:5500
+
+---
+
+# Seed Demo Data
+
+Run:
+
+    node src/db/seed-tenants.js
+
+The seed script prepares demo tenant and widget data used for testing tenant isolation.
+
+API keys used during local testing should not be treated as production credentials.
+
+---
+
+#  Run Automated Tests
+
+Run the complete test suite:
+
+    npm test -- --runInBand
+
+Expected result:
+
+    Test Suites: 7 passed, 7 total
+    Tests:       13 passed, 13 total
+
+---
+
+# End-to-End Verification
+
+The complete platform flow is:
+
+    1. Start API
+           |
+           v
+    2. Start customer website
+           |
+           v
+    3. Open localhost:5500
+           |
+           v
+    4. Widget loads from localhost:3000
+           |
+           v
+    5. Widget configuration is retrieved
+           |
+           v
+    6. Widget renders
+           |
+           v
+    7. Visitor fills the form
+           |
+           v
+    8. POST /api/submissions
+           |
+           v
+    9. Validation
+           |
+           v
+    10. Rate limiting / spam protection
+           |
+           v
+    11. Geo enrichment
+           |
+           v
+    12. Submission stored
+           |
+           v
+    13. Notification side effect
+           |
+           v
+    14. Dashboard retrieves submission
+           |
+           v
+    15. Dashboard statistics include submission
+
+---
+
+# 25. Security & Isolation
+
+The platform applies multiple protection layers.
+
+## Authentication
+
+Authenticated widget-management and dashboard endpoints require a valid API key.
+
+## Tenant Isolation
+
+Database queries use the authenticated tenant identity.
+
+A tenant cannot access another tenant's widgets or submissions simply by supplying a different tenant ID.
+
+## Input Validation
+
+Public submission fields are validated before business logic and database storage.
+
+## Payload Size Protection
+
+Large JSON requests are rejected.
+
+## Rate Limiting
+
+Submission bursts are limited.
+
+## Spam Protection
+
+Honeypot protection rejects automated spam submissions.
+
+## Safe Geo Enrichment
+
+Geo-provider failures do not break the submission path.
+
+## Safe Notification
+
+Notification failures do not prevent stored submissions from succeeding.
+
+## API Key Protection
+
+API keys are never included in the public widget embed snippet.
+
+---
+
+---
+
+# Limitations
+
+This project is intentionally scoped as a backend capstone.
+
+The customer website is served locally and does not use:
+
+- Production hosting
+- A custom domain
+- A real CDN
+- Production email infrastructure
+- Production webhook infrastructure
+
+The widget UI is intentionally minimal because the primary focus is backend architecture, security, tenant isolation, widget delivery, submission processing, and reliability.
+
+---
+
+# Future Improvements
+
+Possible future improvements include:
+
+- Production deployment
+- Real CDN integration
+- Production email/webhook providers
+- More widget types
+- Widget customization options
+- Dashboard frontend
+- More detailed analytics
+- API key rotation
+- Advanced spam detection
+- More comprehensive integration tests
+- Production monitoring and structured logging
+
+These improvements are outside the current core capstone scope.
+
+---
+**Author:** Aroosa Azeem 
+**Project:** FlyRank Embeddable Widget & Lead-Capture Platform (Capstone) |
+
+
+
+
+
+
