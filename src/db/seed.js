@@ -1,6 +1,7 @@
 const db = require("./database");
 
-// Check whether a demo tenant already exists
+const DEMO_API_KEY = "demo-tenant-api-key-12345";
+
 const existingTenant = db
   .prepare("SELECT id FROM tenants WHERE name = ?")
   .get("Demo Tenant");
@@ -9,18 +10,27 @@ let tenantId;
 
 if (existingTenant) {
   tenantId = existingTenant.id;
+
+  db.prepare(`
+    UPDATE tenants
+    SET api_key = ?
+    WHERE id = ?
+  `).run(DEMO_API_KEY, tenantId);
+
   console.log(`Demo tenant already exists with ID: ${tenantId}`);
 } else {
   const tenantResult = db
-    .prepare("INSERT INTO tenants (name) VALUES (?)")
-    .run("Demo Tenant");
+    .prepare(`
+      INSERT INTO tenants (name, api_key)
+      VALUES (?, ?)
+    `)
+    .run("Demo Tenant", DEMO_API_KEY);
 
   tenantId = tenantResult.lastInsertRowid;
 
   console.log(`Created Demo Tenant with ID: ${tenantId}`);
 }
 
-// Check whether a demo widget already exists
 const existingWidget = db
   .prepare(
     "SELECT id FROM widgets WHERE tenant_id = ? AND name = ?"
@@ -51,3 +61,4 @@ if (existingWidget) {
 }
 
 console.log("Database seeding completed.");
+console.log(`Demo API Key: ${DEMO_API_KEY}`);
