@@ -2596,9 +2596,11 @@ Possible future improvements include:
 These improvements are outside the current core capstone scope.
 
 ---
-**Author:** Aroosa Azeem 
-**Project:** FlyRank Embeddable Widget & Lead-Capture Platform (Capstone) |
+**Author:** Aroosa Azeem
 
+**Project:** FlyRank Embeddable Widget & Lead-Capture Platform (Capstone)
+
+**Track:** Backend AI Engineering
 
 
 
