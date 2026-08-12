@@ -579,6 +579,9 @@ After deletion, requesting the same widget returns:
   "error": "Widget not found"
 }
 
+<img width="559" height="105" alt="CAP delition of widget" src="https://github.com/user-attachments/assets/f5ad5544-4a14-4000-901d-a3ba9e42785d" />
+
+
 <img width="558" height="161" alt="CAP Verificatio of delition" src="https://github.com/user-attachments/assets/098ca015-dd55-4356-a9e9-8d340f637a4e" />
 
 
