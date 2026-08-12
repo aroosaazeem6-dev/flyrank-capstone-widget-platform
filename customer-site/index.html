@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  >
+
+  <title>Demo Customer Website</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f7f8;
+    }
+
+    header {
+      padding: 20px 40px;
+      background: white;
+      border-bottom: 1px solid #ddd;
+    }
+
+    main {
+      max-width: 900px;
+      margin: 50px auto;
+      padding: 0 20px;
+    }
+
+    .hero {
+      background: white;
+      padding: 35px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+    }
+
+    .hero h1 {
+      margin-top: 0;
+    }
+
+    .widget-section {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <strong>Demo Customer Website</strong>
+  </header>
+
+  <main>
+
+    <section class="hero">
+      <h1>Welcome to Our Website</h1>
+
+      <p>
+        This page represents a customer website
+        using the FlyRank embeddable widget.
+      </p>
+
+      <p>
+        The API is running on
+        <strong>localhost:3000</strong>,
+        while this customer site runs on
+        <strong>localhost:5500</strong>.
+      </p>
+    </section>
+
+    <section class="widget-section">
+
+      <h2>Contact Us</h2>
+
+      <p>
+        Use the form below to contact us.
+      </p>
+
+      <!-- FlyRank Widget -->
+      <script
+        src="http://localhost:3000/widget.js?id=1&v=1">
+      </script>
+
+    </section>
+
+  </main>
+
+</body>
+</html>

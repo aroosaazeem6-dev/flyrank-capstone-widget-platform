@@ -4,7 +4,9 @@ const db = require("../db/database");
 
 const router = express.Router();
 
+// ----------------------------------------
 // Create a widget
+// ----------------------------------------
 router.post("/", authenticate, (req, res) => {
   const { name, type } = req.body;
 
@@ -35,7 +37,9 @@ router.post("/", authenticate, (req, res) => {
   res.status(201).json(widget);
 });
 
+// ----------------------------------------
 // List widgets for authenticated tenant
+// ----------------------------------------
 router.get("/", authenticate, (req, res) => {
   const widgets = db
     .prepare(`
@@ -49,7 +53,9 @@ router.get("/", authenticate, (req, res) => {
   res.json(widgets);
 });
 
+// ----------------------------------------
 // Get one widget
+// ----------------------------------------
 router.get("/:id", authenticate, (req, res) => {
   const widget = db
     .prepare(`
@@ -66,10 +72,26 @@ router.get("/:id", authenticate, (req, res) => {
     });
   }
 
-  res.json(widget);
+  // ----------------------------------------
+  // Generate embed snippet
+  // ----------------------------------------
+
+  const baseUrl = `${req.protocol}://${req.get("host")}`;
+
+  const embedSnippet =
+    `<script src="${baseUrl}/widget.js?id=${widget.id}&v=${widget.version}"></script>`;
+
+  res.json({
+    ...widget,
+    embed: {
+      script: embedSnippet
+    }
+  });
 });
 
+// ----------------------------------------
 // Update a widget
+// ----------------------------------------
 router.put("/:id", authenticate, (req, res) => {
   const { name, type, status } = req.body;
 
@@ -122,7 +144,9 @@ router.put("/:id", authenticate, (req, res) => {
   res.json(updatedWidget);
 });
 
+// ----------------------------------------
 // Delete a widget
+// ----------------------------------------
 router.delete("/:id", authenticate, (req, res) => {
   const result = db
     .prepare(`
