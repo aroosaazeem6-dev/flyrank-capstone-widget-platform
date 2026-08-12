@@ -1,0 +1,29 @@
+const db = require("./db/database");
+require("dotenv").config();
+
+const express = require("express");
+const cors = require("cors");
+
+const app = express();
+
+const PORT = process.env.PORT || 3000;
+
+app.use(cors());
+app.use(express.json());
+
+app.get("/", (req, res) => {
+  res.json({
+    message: "FlyRank Embeddable Widget & Lead-Capture Platform API",
+    status: "running"
+  });
+});
+
+app.get("/health", (req, res) => {
+  res.json({
+    status: "ok"
+  });
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
+});
